@@ -57,9 +57,14 @@ export function sectionEn(raw: string): string {
 
 // Hebrew day-of-week names
 const HE_DAYS = ["יום א׳", "יום ב׳", "יום ג׳", "יום ד׳", "יום ה׳", "יום ו׳", "שבת"];
+const EN_DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 export function formatHebrewDate(iso: string): string {
   const d = new Date(iso);
   return `${HE_DAYS[d.getDay()]} ${d.getDate()}/${d.getMonth() + 1}`;
+}
+export function formatEnDate(iso: string): string {
+  const d = new Date(iso);
+  return `${EN_DAYS[d.getDay()]} ${d.getDate()}/${d.getMonth() + 1}`;
 }
 export function formatTime(iso: string): string {
   const d = new Date(iso);
@@ -93,6 +98,30 @@ export function filmsBySection(): Map<string, Film[]> {
     m.get(key)!.push(f);
   }
   return m;
+}
+
+// The festival site uses a single fallback image for every film that hasn't
+// uploaded its own poster. Treat that URL as "no poster" so the UI can render
+// a typographic placeholder instead of 50 identical logos.
+export const PLACEHOLDER_POSTER_URL = "https://www.docaviv.co.il/wp-content/uploads/2026/05/DOCAVIV-Main-Slide-1-scaled.png";
+export function hasRealPoster(film: Film): boolean {
+  return !!film.posterUrl && film.posterUrl !== PLACEHOLDER_POSTER_URL;
+}
+
+// Deterministic hue per section for the typographic poster fallback.
+// Unknown sections still get a stable colour without a hard-coded mapping.
+export function sectionHue(s: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
+  return (h >>> 0) % 360;
+}
+
+export function nextScreeningForFilm(film: Film, nowIso: string = new Date().toISOString()): Screening | undefined {
+  const list = film.screeningIds
+    .map((id) => screeningById.get(id))
+    .filter((s): s is Screening => Boolean(s))
+    .sort((a, b) => a.start.localeCompare(b.start));
+  return list.find((s) => s.start >= nowIso) ?? list[0];
 }
 
 export function nextScreenings(limit = 8): Screening[] {

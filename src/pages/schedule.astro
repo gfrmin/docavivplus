@@ -38,7 +38,7 @@ function dayLabel(iso: string) {
                 {film
                   ? <a href={`/films/${film.slug}/`} style="flex:2;color:var(--fg)" data-he={film.titleHe} data-en={film.titleEn || film.titleHe}>{film.titleHe}{film.titleEn && <span style="color:var(--fg-faint)"> · {film.titleEn}</span>}</a>
                   : <span style="flex:2;color:var(--fg-dim)">{s.infoText}</span>}
-                {s.isPremiere && <span class="screening-row__premiere" data-he="בנוכחות היוצרים" data-en="Q&A">בנוכחות היוצרים</span>}
+                {s.isPremiere && <span class="screening-row__premiere" data-he="בנוכחות היוצרים" data-en="With filmmakers">בנוכחות היוצרים</span>}
                 {s.ticketUrl && <a class="screening-row__btn" href={s.ticketUrl} target="_blank" rel="noopener" data-he="לכרטיסים" data-en="Tickets">לכרטיסים</a>}
               </div>
             );

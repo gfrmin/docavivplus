@@ -53,6 +53,12 @@ const filmIndex = data.films.map((f) => ({
     {data.films.map((f) => <FilmCard film={f} />)}
   </div>
 
+  <div id="film-empty" class="empty-state" hidden>
+    <p data-he="לא נמצאו סרטים מתאימים." data-en="No films match.">לא נמצאו סרטים מתאימים.</p>
+    <p data-he="נסה לנקות מסנן או לשנות את החיפוש." data-en="Try clearing a filter or changing your search." style="color:var(--fg-faint);font-size:0.9rem">נסה לנקות מסנן או לשנות את החיפוש.</p>
+    <button type="button" id="f-clear" class="empty-state__btn" data-he="ניקוי כל המסננים" data-en="Clear all filters">ניקוי כל המסננים</button>
+  </div>
+
   <script type="application/json" id="film-index" set:html={JSON.stringify(filmIndex)} />
 
   <script>
@@ -129,6 +135,8 @@ const filmIndex = data.films.map((f) => ({
         if (show) n++;
       }
       countEl.textContent = String(n);
+      const emptyEl = document.getElementById("film-empty");
+      if (emptyEl) emptyEl.hidden = n > 0;
 
       // Sync URL for shareable filters
       const params = new URLSearchParams();
@@ -154,6 +162,15 @@ const filmIndex = data.films.map((f) => ({
       el.addEventListener("input", apply);
       el.addEventListener("change", apply);
     }
+
+    document.getElementById("f-clear")?.addEventListener("click", () => {
+      inputSearch.value = "";
+      inputSection.value = "";
+      inputCountry.value = "";
+      inputRuntime.value = "";
+      inputScreenings.checked = false;
+      apply();
+    });
 
     // Apply once at load
     apply();

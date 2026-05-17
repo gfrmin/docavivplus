@@ -1,17 +1,25 @@
 ---
 import type { Film } from "../data.ts";
-import { countryHe, countryEn } from "../data.ts";
+import { countryHe, countryEn, hasRealPoster, sectionHue, nextScreeningForFilm, formatHebrewDate, formatEnDate, formatTime } from "../data.ts";
 
 export interface Props { film: Film; }
 const { film } = Astro.props;
 const cHe = countryHe(film.countryHe);
 const cEn = countryEn(film.countryHe);
+const realPoster = hasRealPoster(film);
+const hue = sectionHue(film.section || film.titleHe || "");
+const next = nextScreeningForFilm(film);
+const nextHe = next ? `${formatHebrewDate(next.start)} · ${formatTime(next.start)}` : "";
+const nextEn = next ? `${formatEnDate(next.start)} · ${formatTime(next.start)}` : "";
 ---
 <a class="film-card" href={`/films/${film.slug}/`}>
-  <div
-    class="film-card__poster"
-    style={film.posterUrl ? `background-image:url(${film.posterUrl})` : ""}
-  ></div>
+  {realPoster ? (
+    <div class="film-card__poster" style={`background-image:url(${film.posterUrl})`}></div>
+  ) : (
+    <div class="film-card__poster film-card__poster--placeholder" style={`--hue:${hue}`}>
+      <span class="film-card__poster-title" data-he={film.titleHe} data-en={film.titleEn || film.titleHe}>{film.titleHe}</span>
+    </div>
+  )}
   <div class="film-card__body">
     {film.section && <div class="film-card__section">{film.section}</div>}
     <div class="film-card__title" data-he={film.titleHe} data-en={film.titleEn || film.titleHe}>{film.titleHe}</div>
@@ -21,5 +29,8 @@ const cEn = countryEn(film.countryHe);
       {cHe && <span data-he={cHe} data-en={cEn}>{cHe}</span>}
       {film.director && <span>· {film.director}</span>}
     </div>
+    {next && (
+      <div class="film-card__next" data-he={nextHe} data-en={nextEn}>{nextHe}</div>
+    )}
   </div>
 </a>
