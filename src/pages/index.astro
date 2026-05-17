@@ -1,0 +1,57 @@
+---
+import Layout from "../layouts/Layout.astro";
+import FilmCard from "../components/FilmCard.astro";
+import { data, filmBySlug, venueById, nextScreenings, formatHebrewDate, formatTime } from "../data.ts";
+
+const upcoming = nextScreenings(12);
+const featured = data.films
+  .filter((f) => f.screeningIds.length && f.posterUrl && f.synopsisHe)
+  .slice(0, 6);
+const totalFilms = data.films.length;
+const totalScreenings = data.screenings.length;
+const venueCount = data.venues.length;
+const sectionCount = new Set(data.films.map((f) => f.section).filter(Boolean)).size;
+---
+<Layout title="פסטיבל דוקאביב 2026 — גילוי משופר">
+  <section class="hero">
+    <h1 data-he="פסטיבל דוקאביב 2026" data-en="Docaviv 2026">פסטיבל דוקאביב 2026</h1>
+    <p data-he={`${totalFilms} סרטים · ${totalScreenings} הקרנות · ${venueCount} מקומות · ${sectionCount} מסגרות. גילוי מהיר, סינון נורמלי, ולוח זמנים שעובד.`}
+       data-en={`${totalFilms} films · ${totalScreenings} screenings · ${venueCount} venues · ${sectionCount} sections. Fast discovery, real filters, a schedule that works.`}>
+      {totalFilms} סרטים · {totalScreenings} הקרנות · {venueCount} מקומות · {sectionCount} מסגרות. גילוי מהיר, סינון נורמלי, ולוח זמנים שעובד.
+    </p>
+  </section>
+
+  <div class="section-heading">
+    <h2 data-he="הקרנות קרובות" data-en="Upcoming screenings">הקרנות קרובות</h2>
+    <span class="section-heading__count">{upcoming.length}</span>
+  </div>
+  {upcoming.length === 0 && <p style="color:var(--fg-dim)">אין הקרנות עתידיות במאגר. אולי הפסטיבל הסתיים, או שעדיין לא פורסם לוח הזמנים.</p>}
+  <div class="screening-list">
+    {upcoming.map((s) => {
+      const film = s.filmSlug ? filmBySlug.get(s.filmSlug) : undefined;
+      const venue = s.venueId ? venueById.get(s.venueId) : undefined;
+      return (
+        <div class="screening-row">
+          <span class="screening-row__when">{formatHebrewDate(s.start)}</span>
+          <span class="screening-row__time">{formatTime(s.start)}</span>
+          <span class="screening-row__venue">{venue?.nameHe ?? "—"}</span>
+          {film
+            ? <a href={`/films/${film.slug}/`} style="flex:2;color:var(--fg)">{film.titleHe} {film.titleEn && <span style="color:var(--fg-faint)">· {film.titleEn}</span>}</a>
+            : <span style="flex:2;color:var(--fg-dim)">{s.infoText}</span>}
+          {s.isPremiere && <span class="screening-row__premiere" data-he="בנוכחות היוצרים" data-en="Q&A">בנוכחות היוצרים</span>}
+          {s.ticketUrl && <a class="screening-row__btn" href={s.ticketUrl} target="_blank" rel="noopener" data-he="לכרטיסים" data-en="Tickets">לכרטיסים</a>}
+        </div>
+      );
+    })}
+  </div>
+
+  <div class="section-heading">
+    <h2 data-he="סרטים נבחרים" data-en="Featured films">סרטים נבחרים</h2>
+  </div>
+  <div class="film-grid">
+    {featured.map((f) => <FilmCard film={f} />)}
+  </div>
+  <p style="margin-top:1.5rem">
+    <a href="/films" data-he="כל הסרטים →" data-en="All films →">כל הסרטים →</a>
+  </p>
+</Layout>

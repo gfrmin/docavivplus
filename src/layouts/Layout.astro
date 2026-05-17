@@ -1,0 +1,83 @@
+---
+import "../styles/global.css";
+
+export interface Props {
+  title: string;
+  description?: string;
+  lang?: "he" | "en";
+}
+
+const { title, description = "מדריך הסרטים של פסטיבל דוקאביב — חיפוש, סינון, ולוח זמנים נקי", lang = "he" } = Astro.props;
+const dir = lang === "he" ? "rtl" : "ltr";
+const pathname = Astro.url.pathname;
+function navClass(href: string) {
+  if (href === "/" && pathname === "/") return "active";
+  if (href !== "/" && pathname.startsWith(href)) return "active";
+  return "";
+}
+---
+<!doctype html>
+<html lang={lang} dir={dir}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>{title} — docaviv+</title>
+    <meta name="description" content={description} />
+    <link rel="preconnect" href="https://www.docaviv.co.il" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a href="/" class="site-header__logo">docaviv<span>+</span></a>
+        <nav class="site-header__nav">
+          <a href="/" class={navClass("/")}>בית</a>
+          <a href="/films" class={navClass("/films")}>סרטים</a>
+          <a href="/schedule" class={navClass("/schedule")}>לוח זמנים</a>
+          <a href="/venues" class={navClass("/venues")}>מקומות</a>
+        </nav>
+        <button class="site-header__lang" id="lang-toggle" type="button" aria-label="Switch language">EN</button>
+      </div>
+    </header>
+    <main class="container">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <p>docaviv+ · <span data-he="גרסה משופרת לגילוי סרטים בפסטיבל דוקאביב" data-en="A better discovery frontend for the Docaviv festival">גרסה משופרת לגילוי סרטים בפסטיבל דוקאביב</span> · <span data-he="מבוסס על הנתונים הציבוריים של" data-en="Built from public data at">מבוסס על הנתונים הציבוריים של</span> <a href="https://www.docaviv.co.il" rel="noopener" target="_blank">docaviv.co.il</a></p>
+      <p style="margin-top:0.5rem">
+        <span data-he="נבנה על-ידי" data-en="Built by">נבנה על-ידי</span>
+        <a href="https://gfrm.in" rel="noopener">Guy Freeman</a>
+      </p>
+    </footer>
+    <script is:inline>
+      // Tiny language toggle: swaps text nodes labelled with data-he / data-en.
+      const btn = document.getElementById('lang-toggle');
+      function applyLang(lang) {
+        document.documentElement.lang = lang;
+        document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
+        if (btn) btn.textContent = lang === 'he' ? 'EN' : 'עב';
+        document.querySelectorAll('[data-he]').forEach((el) => {
+          const he = el.getAttribute('data-he') || '';
+          const en = el.getAttribute('data-en') || '';
+          const text = lang === 'he' ? he : (en || he);
+          if (el.tagName === 'OPTION') el.text = text;
+          else el.textContent = text;
+        });
+        document.querySelectorAll('[data-placeholder-he]').forEach((el) => {
+          const he = el.getAttribute('data-placeholder-he') || '';
+          const en = el.getAttribute('data-placeholder-en') || '';
+          el.placeholder = lang === 'he' ? he : (en || he);
+        });
+      }
+      const saved = localStorage.getItem('docavivplus-lang') || 'he';
+      applyLang(saved);
+      btn?.addEventListener('click', () => {
+        const next = document.documentElement.lang === 'he' ? 'en' : 'he';
+        localStorage.setItem('docavivplus-lang', next);
+        applyLang(next);
+      });
+    </script>
+  </body>
+</html>

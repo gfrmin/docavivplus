@@ -1,0 +1,25 @@
+---
+import type { Film } from "../data.ts";
+import { countryHe, countryEn } from "../data.ts";
+
+export interface Props { film: Film; }
+const { film } = Astro.props;
+const cHe = countryHe(film.countryHe);
+const cEn = countryEn(film.countryHe);
+---
+<a class="film-card" href={`/films/${film.slug}/`}>
+  <div
+    class="film-card__poster"
+    style={film.posterUrl ? `background-image:url(${film.posterUrl})` : ""}
+  ></div>
+  <div class="film-card__body">
+    {film.section && <div class="film-card__section">{film.section}</div>}
+    <div class="film-card__title" data-he={film.titleHe} data-en={film.titleEn || film.titleHe}>{film.titleHe}</div>
+    {film.titleEn && <div class="film-card__title-en" data-he={film.titleEn} data-en={film.titleHe || film.titleEn}>{film.titleEn}</div>}
+    <div class="film-card__meta">
+      {film.runtimeMin && <span>{film.runtimeMin}׳</span>}
+      {cHe && <span data-he={cHe} data-en={cEn}>{cHe}</span>}
+      {film.director && <span>· {film.director}</span>}
+    </div>
+  </div>
+</a>

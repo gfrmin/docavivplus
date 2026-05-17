@@ -1,0 +1,39 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { data, filmBySlug, formatHebrewDate, formatTime } from "../../data.ts";
+
+export function getStaticPaths() {
+  return data.venues.map((v) => ({ params: { slug: v.slug } }));
+}
+const { slug } = Astro.params;
+const venue = data.venues.find((v) => v.slug === slug);
+if (!venue) throw new Error(`Venue not found: ${slug}`);
+
+const screenings = data.screenings
+  .filter((s) => s.venueId === venue.id)
+  .sort((a, b) => a.start.localeCompare(b.start));
+---
+<Layout title={venue.nameHe}>
+  <div class="section-heading">
+    <h2>{venue.nameHe}</h2>
+    <span class="section-heading__count">{screenings.length} <span data-he="הקרנות" data-en="screenings">הקרנות</span></span>
+  </div>
+  {venue.description && <p style="color:var(--fg-dim);max-width:60ch">{venue.description}</p>}
+
+  <div class="screening-list" style="margin-top:1.5rem">
+    {screenings.map((s) => {
+      const film = s.filmSlug ? filmBySlug.get(s.filmSlug) : undefined;
+      return (
+        <div class="screening-row">
+          <span class="screening-row__when">{formatHebrewDate(s.start)}</span>
+          <span class="screening-row__time">{formatTime(s.start)}</span>
+          {film
+            ? <a href={`/films/${film.slug}/`} style="flex:2;color:var(--fg)">{film.titleHe}{film.titleEn && <span style="color:var(--fg-faint)"> · {film.titleEn}</span>}</a>
+            : <span style="flex:2;color:var(--fg-dim)">{s.infoText}</span>}
+          {s.isPremiere && <span class="screening-row__premiere" data-he="בנוכחות היוצרים" data-en="Q&A">בנוכחות היוצרים</span>}
+          {s.ticketUrl && <a class="screening-row__btn" href={s.ticketUrl} target="_blank" rel="noopener" data-he="לכרטיסים" data-en="Tickets">לכרטיסים</a>}
+        </div>
+      );
+    })}
+  </div>
+</Layout>

@@ -1,0 +1,29 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { data, filmsByVenue } from "../../data.ts";
+
+const venues = data.venues
+  .map((v) => ({ ...v, filmCount: filmsByVenue(v.id).size, screeningCount: data.screenings.filter((s) => s.venueId === v.id).length }))
+  .filter((v) => v.screeningCount > 0)
+  .sort((a, b) => b.screeningCount - a.screeningCount);
+---
+<Layout title="מקומות">
+  <div class="section-heading">
+    <h2 data-he="מקומות" data-en="Venues">מקומות</h2>
+    <span class="section-heading__count">{venues.length}</span>
+  </div>
+
+  <div class="film-grid" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr))">
+    {venues.map((v) => (
+      <a href={`/venues/${v.slug}/`} class="film-card" style="aspect-ratio:auto">
+        <div class="film-card__body">
+          <div class="film-card__title">{v.nameHe}</div>
+          <div class="film-card__meta">
+            <span>{v.screeningCount} <span data-he="הקרנות" data-en="screenings">הקרנות</span></span>
+            <span>· {v.filmCount} <span data-he="סרטים" data-en="films">סרטים</span></span>
+          </div>
+        </div>
+      </a>
+    ))}
+  </div>
+</Layout>

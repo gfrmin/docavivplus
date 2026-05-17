@@ -1,0 +1,87 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { data, filmBySlug, venueById, screeningById, countryHe, countryEn, formatHebrewDate, formatTime } from "../../data.ts";
+
+export function getStaticPaths() {
+  // Astro 4 type-narrowing: import data fresh from JSON
+  return data.films.map((f) => ({ params: { slug: f.slug } }));
+}
+
+const { slug } = Astro.params;
+const film = filmBySlug.get(slug!);
+if (!film) throw new Error(`Film not found: ${slug}`);
+
+const screenings = film.screeningIds
+  .map((id) => screeningById.get(id))
+  .filter(<T,>(s: T): s is NonNullable<T> => Boolean(s))
+  .sort((a, b) => a.start.localeCompare(b.start));
+
+const cHe = countryHe(film.countryHe);
+const cEn = countryEn(film.countryHe);
+---
+<Layout title={film.titleHe || film.titleEn || "סרט"} description={film.synopsisHe?.slice(0, 160)}>
+  <article class="film-detail">
+    <div>
+      {film.posterUrl ? (
+        <img class="film-detail__poster" src={film.posterUrl} alt={`Poster: ${film.titleHe}`} loading="eager" />
+      ) : (
+        <div class="film-detail__poster" style="aspect-ratio:3/4;background:var(--bg-soft)"></div>
+      )}
+    </div>
+    <div>
+      {film.section && <div class="film-card__section" style="margin-bottom:0.5rem">{film.section}</div>}
+      <h1 class="film-detail__title-he" data-he={film.titleHe} data-en={film.titleEn || film.titleHe}>{film.titleHe}</h1>
+      {film.titleEn && film.titleEn !== film.titleHe && (
+        <div class="film-detail__title-en" data-he={film.titleEn} data-en={film.titleHe}>{film.titleEn}</div>
+      )}
+
+      <div class="film-detail__meta">
+        {film.director && <span data-he={`במאי: ${film.director}`} data-en={`Director: ${film.director}`}>במאי: <strong>{film.director}</strong></span>}
+        {film.runtimeMin && <span>·  <strong>{film.runtimeMin}</strong>׳</span>}
+        {cHe && <span data-he={`· ${cHe}`} data-en={`· ${cEn}`}>· <strong>{cHe}</strong></span>}
+      </div>
+
+      {film.synopsisHe && (
+        <p class="film-detail__synopsis" data-he={film.synopsisHe} data-en={film.synopsisEn || film.synopsisHe}>
+          {film.synopsisHe}
+        </p>
+      )}
+
+      {film.trailerUrl && (
+        <iframe
+          class="film-detail__trailer"
+          src={film.trailerUrl}
+          title="Trailer"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+        ></iframe>
+      )}
+
+      <div class="section-heading">
+        <h2 data-he="הקרנות" data-en="Screenings">הקרנות</h2>
+        <span class="section-heading__count">{screenings.length}</span>
+      </div>
+      {screenings.length === 0 && <p style="color:var(--fg-dim)" data-he="אין הקרנות במאגר" data-en="No screenings on record">אין הקרנות במאגר</p>}
+      <div class="screening-list">
+        {screenings.map((s) => {
+          const venue = s.venueId ? venueById.get(s.venueId) : undefined;
+          return (
+            <div class="screening-row">
+              <span class="screening-row__when">{formatHebrewDate(s.start)}</span>
+              <span class="screening-row__time">{formatTime(s.start)}</span>
+              <span class="screening-row__venue">{venue?.nameHe ?? "—"}</span>
+              {s.isPremiere && <span class="screening-row__premiere" data-he="בנוכחות היוצרים" data-en="Q&A">בנוכחות היוצרים</span>}
+              {s.ticketUrl
+                ? <a class="screening-row__btn" href={s.ticketUrl} target="_blank" rel="noopener" data-he="לכרטיסים" data-en="Tickets">לכרטיסים</a>
+                : <span style="color:var(--fg-faint);font-size:0.85rem" data-he="אין קישור" data-en="No link">אין קישור</span>}
+            </div>
+          );
+        })}
+      </div>
+
+      <p style="margin-top:2rem;color:var(--fg-faint);font-size:0.85rem">
+        <a href={film.url} target="_blank" rel="noopener" data-he="עמוד הסרט באתר הרשמי →" data-en="Official film page →">עמוד הסרט באתר הרשמי →</a>
+      </p>
+    </div>
+  </article>
+</Layout>

@@ -1,0 +1,161 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import FilmCard from "../../components/FilmCard.astro";
+import { data, countryHe, countryEn, sectionEn } from "../../data.ts";
+
+const sections = [...new Set(data.films.map((f) => f.section).filter(Boolean))].sort();
+const countries = [...new Set(data.films.map((f) => f.countryHe).filter(Boolean))].sort();
+// Pass film index as JSON to client for fast filter/search.
+const filmIndex = data.films.map((f) => ({
+  slug: f.slug,
+  titleHe: f.titleHe,
+  titleEn: f.titleEn,
+  section: f.section,
+  director: f.director,
+  countryHe: f.countryHe,
+  countryEn: countryEn(f.countryHe),
+  runtimeMin: f.runtimeMin,
+  synopsisHe: f.synopsisHe,
+  synopsisEn: f.synopsisEn,
+  hasScreenings: f.screeningIds.length > 0,
+}));
+---
+<Layout title="כל הסרטים">
+  <div class="section-heading">
+    <h2 data-he="כל הסרטים" data-en="All films">כל הסרטים</h2>
+    <span class="section-heading__count">{data.films.length}</span>
+  </div>
+
+  <div class="filters">
+    <input id="f-search" type="search" placeholder="חיפוש לפי כותרת, במאי, או תקציר…" data-placeholder-he="חיפוש לפי כותרת, במאי, או תקציר…" data-placeholder-en="Search title, director, or synopsis…" />
+    <select id="f-section">
+      <option value="" data-he="כל המסגרות" data-en="All sections">כל המסגרות</option>
+      {sections.map((s) => <option value={s} data-he={s} data-en={sectionEn(s)}>{s}</option>)}
+    </select>
+    <select id="f-country">
+      <option value="" data-he="כל המדינות" data-en="All countries">כל המדינות</option>
+      {countries.map((c) => <option value={c} data-he={countryHe(c)} data-en={countryEn(c)}>{countryHe(c)}</option>)}
+    </select>
+    <select id="f-runtime">
+      <option value="" data-he="כל אורך" data-en="Any length">כל אורך</option>
+      <option value="short" data-he="קצר (עד 60ד׳)" data-en="Short (≤60min)">קצר (עד 60ד׳)</option>
+      <option value="medium" data-he="בינוני (60–90ד׳)" data-en="Medium (60–90min)">בינוני (60–90ד׳)</option>
+      <option value="long" data-he="ארוך (≥90ד׳)" data-en="Long (≥90min)">ארוך (≥90ד׳)</option>
+    </select>
+    <label style="display:flex;align-items:center;gap:0.4rem;color:var(--fg-dim);font-size:0.9rem">
+      <input id="f-screenings" type="checkbox" />
+      <span data-he="רק עם הקרנות" data-en="Has screenings">רק עם הקרנות</span>
+    </label>
+    <span class="filters__results" id="f-count">{data.films.length}</span>
+  </div>
+
+  <div class="film-grid" id="film-grid">
+    {data.films.map((f) => <FilmCard film={f} />)}
+  </div>
+
+  <script type="application/json" id="film-index" set:html={JSON.stringify(filmIndex)} />
+
+  <script>
+    import Fuse from "fuse.js";
+
+    type FilmEntry = {
+      slug: string;
+      titleHe: string;
+      titleEn: string;
+      section: string;
+      director: string;
+      countryHe: string;
+      countryEn: string;
+      runtimeMin: number | null;
+      synopsisHe: string;
+      synopsisEn: string;
+      hasScreenings: boolean;
+    };
+
+    const indexData = JSON.parse((document.getElementById("film-index") as HTMLElement).textContent || "[]") as FilmEntry[];
+    const fuse = new Fuse(indexData, {
+      keys: ["titleHe", "titleEn", "director", "synopsisHe", "synopsisEn", "section"],
+      threshold: 0.35,
+      ignoreLocation: true,
+      minMatchCharLength: 2,
+    });
+
+    const grid = document.getElementById("film-grid")!;
+    const cards = new Map<string, HTMLElement>();
+    grid.querySelectorAll<HTMLElement>(".film-card").forEach((card) => {
+      const slug = card.getAttribute("href")?.replace(/\/films\/|\//g, "") ?? "";
+      if (slug) cards.set(slug, card);
+    });
+
+    const inputSearch = document.getElementById("f-search") as HTMLInputElement;
+    const inputSection = document.getElementById("f-section") as HTMLSelectElement;
+    const inputCountry = document.getElementById("f-country") as HTMLSelectElement;
+    const inputRuntime = document.getElementById("f-runtime") as HTMLSelectElement;
+    const inputScreenings = document.getElementById("f-screenings") as HTMLInputElement;
+    const countEl = document.getElementById("f-count")!;
+
+    function lengthBucket(min: number | null): "short" | "medium" | "long" | "" {
+      if (min == null) return "";
+      if (min <= 60) return "short";
+      if (min < 90) return "medium";
+      return "long";
+    }
+
+    function apply() {
+      const q = inputSearch.value.trim();
+      const section = inputSection.value;
+      const country = inputCountry.value;
+      const runtime = inputRuntime.value;
+      const requireScreenings = inputScreenings.checked;
+
+      // Step 1: text search via Fuse (or full list)
+      const matched: FilmEntry[] = q.length >= 2
+        ? fuse.search(q).map((r) => r.item)
+        : indexData.slice();
+
+      const allowed = new Set<string>();
+      for (const f of matched) {
+        if (section && f.section !== section) continue;
+        if (country && f.countryHe !== country) continue;
+        if (requireScreenings && !f.hasScreenings) continue;
+        if (runtime && lengthBucket(f.runtimeMin) !== runtime) continue;
+        allowed.add(f.slug);
+      }
+
+      let n = 0;
+      for (const [slug, card] of cards) {
+        const show = allowed.has(slug);
+        card.hidden = !show;
+        if (show) n++;
+      }
+      countEl.textContent = String(n);
+
+      // Sync URL for shareable filters
+      const params = new URLSearchParams();
+      if (q) params.set("q", q);
+      if (section) params.set("section", section);
+      if (country) params.set("country", country);
+      if (runtime) params.set("runtime", runtime);
+      if (requireScreenings) params.set("screenings", "1");
+      const qs = params.toString();
+      const target = qs ? `?${qs}` : window.location.pathname;
+      history.replaceState(null, "", target);
+    }
+
+    // Initial state from URL
+    const p = new URLSearchParams(window.location.search);
+    if (p.get("q")) inputSearch.value = p.get("q")!;
+    if (p.get("section")) inputSection.value = p.get("section")!;
+    if (p.get("country")) inputCountry.value = p.get("country")!;
+    if (p.get("runtime")) inputRuntime.value = p.get("runtime")!;
+    if (p.get("screenings")) inputScreenings.checked = true;
+
+    for (const el of [inputSearch, inputSection, inputCountry, inputRuntime, inputScreenings]) {
+      el.addEventListener("input", apply);
+      el.addEventListener("change", apply);
+    }
+
+    // Apply once at load
+    apply();
+  </script>
+</Layout>
