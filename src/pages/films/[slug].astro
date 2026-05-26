@@ -1,6 +1,6 @@
 ---
 import Layout from "../../layouts/Layout.astro";
-import { data, filmBySlug, venueById, screeningById, countryHe, countryEn, formatHebrewDate, formatTime, hasRealPoster, sectionHue } from "../../data.ts";
+import { data, filmBySlug, venueById, screeningById, countryHe, countryEn, formatHebrewDate, formatEnDate, formatTime, hasRealPoster, sectionHue } from "../../data.ts";
 
 export function getStaticPaths() {
   // Astro 4 type-narrowing: import data fresh from JSON
@@ -70,7 +70,7 @@ const cEn = countryEn(film.countryHe);
           const venue = s.venueId ? venueById.get(s.venueId) : undefined;
           return (
             <div class="screening-row">
-              <span class="screening-row__when">{formatHebrewDate(s.start)}</span>
+              <span class="screening-row__when" data-he={formatHebrewDate(s.start)} data-en={formatEnDate(s.start)}>{formatHebrewDate(s.start)}</span>
               <span class="screening-row__time">{formatTime(s.start)}</span>
               <span class="screening-row__venue">{venue?.nameHe ?? "—"}</span>
               {s.isPremiere && <span class="screening-row__premiere" data-he="בנוכחות היוצרים" data-en="With filmmakers">בנוכחות היוצרים</span>}

@@ -17,6 +17,9 @@ export const screeningById: Map<number, Screening> = new Map(data.screenings.map
 const COUNTRY_MAP: Record<string, string> = {
   AT: "אוסטריה", BE: "בלגיה", CA: "קנדה", EE: "אסטוניה", FR: "צרפת",
   IT: "איטליה", NL: "הולנד", NO: "נורווגיה", PL: "פולין",
+  Greece: "יוון", Lithuania: "ליטא",
+  // Source has a misspelling of Ukraine (אוקריאנה → אוקראינה); normalise for display.
+  "אוקריאנה": "אוקראינה",
 };
 const COUNTRY_EN_MAP: Record<string, string> = {
   AT: "Austria", BE: "Belgium", CA: "Canada", EE: "Estonia", FR: "France",

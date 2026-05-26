@@ -4,10 +4,13 @@ import { data, filmBySlug, venueById, screeningsByDay, formatTime } from "../dat
 
 const days = [...screeningsByDay().entries()].sort();
 const HE_DAY_NAMES = ["יום ראשון", "יום שני", "יום שלישי", "יום רביעי", "יום חמישי", "יום שישי", "שבת"];
-function dayLabel(iso: string) {
+const EN_DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+function dayLabel(iso: string, names: string[]) {
   const d = new Date(iso + "T00:00:00");
-  return `${HE_DAY_NAMES[d.getDay()]} · ${d.getDate()}/${d.getMonth() + 1}`;
+  return `${names[d.getDay()]} · ${d.getDate()}/${d.getMonth() + 1}`;
 }
+const dayLabelHe = (iso: string) => dayLabel(iso, HE_DAY_NAMES);
+const dayLabelEn = (iso: string) => dayLabel(iso, EN_DAY_NAMES);
 ---
 <Layout title="לוח זמנים">
   <div class="section-heading">
@@ -20,13 +23,13 @@ function dayLabel(iso: string) {
   </p>
 
   <nav style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:2rem">
-    {days.map(([k]) => <a href={`#day-${k}`} class="pill pill--ghost">{dayLabel(k)}</a>)}
+    {days.map(([k]) => <a href={`#day-${k}`} class="pill pill--ghost" data-he={dayLabelHe(k)} data-en={dayLabelEn(k)}>{dayLabelHe(k)}</a>)}
   </nav>
 
   <div class="schedule">
     {days.map(([day, screenings]) => (
       <section id={`day-${day}`} class="schedule__day">
-        <h2>{dayLabel(day)} <span style="color:var(--fg-faint);font-size:0.7em">{screenings.length}</span></h2>
+        <h2><span data-he={dayLabelHe(day)} data-en={dayLabelEn(day)}>{dayLabelHe(day)}</span> <span style="color:var(--fg-faint);font-size:0.7em">{screenings.length}</span></h2>
         <div class="screening-list">
           {screenings.map((s) => {
             const film = s.filmSlug ? filmBySlug.get(s.filmSlug) : undefined;
