@@ -3,8 +3,12 @@ import Layout from "../../layouts/Layout.astro";
 import FilmCard from "../../components/FilmCard.astro";
 import { data, countryHe, countryEn, sectionEn } from "../../data.ts";
 
-const sections = [...new Set(data.films.map((f) => f.section).filter(Boolean))].sort();
-const countries = [...new Set(data.films.map((f) => f.countryHe).filter(Boolean))].sort();
+// Sort by the Hebrew display label so the initial (JS-less) render is alphabetical.
+// The language toggle re-sorts these by the displayed text when switching to English.
+const sections = [...new Set(data.films.map((f) => f.section).filter(Boolean))]
+  .sort((a, b) => a.localeCompare(b, "he"));
+const countries = [...new Set(data.films.map((f) => f.countryHe).filter(Boolean))]
+  .sort((a, b) => countryHe(a).localeCompare(countryHe(b), "he"));
 // Pass film index as JSON to client for fast filter/search.
 const filmIndex = data.films.map((f) => ({
   slug: f.slug,
@@ -28,11 +32,11 @@ const filmIndex = data.films.map((f) => ({
 
   <div class="filters">
     <input id="f-search" type="search" placeholder="חיפוש לפי כותרת, במאי, או תקציר…" data-placeholder-he="חיפוש לפי כותרת, במאי, או תקציר…" data-placeholder-en="Search title, director, or synopsis…" />
-    <select id="f-section">
+    <select id="f-section" data-sort-options>
       <option value="" data-he="כל המסגרות" data-en="All sections">כל המסגרות</option>
       {sections.map((s) => <option value={s} data-he={s} data-en={sectionEn(s)}>{s}</option>)}
     </select>
-    <select id="f-country">
+    <select id="f-country" data-sort-options>
       <option value="" data-he="כל המדינות" data-en="All countries">כל המדינות</option>
       {countries.map((c) => <option value={c} data-he={countryHe(c)} data-en={countryEn(c)}>{countryHe(c)}</option>)}
     </select>

@@ -54,6 +54,19 @@ function navClass(href: string) {
     <script is:inline>
       // Tiny language toggle: swaps text nodes labelled with data-he / data-en.
       const btn = document.getElementById('lang-toggle');
+      // Re-sort <select data-sort-options> by displayed text in the active locale.
+      // Build-time order is alphabetical in Hebrew; this keeps it alphabetical in English too.
+      function sortSelects(lang) {
+        document.querySelectorAll('select[data-sort-options]').forEach((sel) => {
+          const opts = Array.from(sel.options);
+          const pinned = opts.filter((o) => o.value === '');
+          const rest = opts.filter((o) => o.value !== '');
+          rest.sort((a, b) => a.text.localeCompare(b.text, lang, { sensitivity: 'base' }));
+          const selected = sel.value;
+          [...pinned, ...rest].forEach((o) => sel.appendChild(o));
+          sel.value = selected;
+        });
+      }
       function applyLang(lang) {
         document.documentElement.lang = lang;
         document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
@@ -70,6 +83,7 @@ function navClass(href: string) {
           const en = el.getAttribute('data-placeholder-en') || '';
           el.placeholder = lang === 'he' ? he : (en || he);
         });
+        sortSelects(lang);
       }
       const saved = localStorage.getItem('docavivplus-lang') || 'he';
       applyLang(saved);

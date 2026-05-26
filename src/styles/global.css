@@ -232,6 +232,7 @@ h3 { font-size: 1.2rem; }
   display: grid;
   gap: 1.5rem;
 }
+.schedule__day { scroll-margin-top: 5rem; }
 .schedule__day h2 { color: var(--accent); margin-bottom: 0.75rem; }
 .schedule__grid { display: grid; gap: 0.5rem; }
 

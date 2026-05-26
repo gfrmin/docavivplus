@@ -1,7 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import FilmCard from "../components/FilmCard.astro";
-import { data, filmBySlug, venueById, nextScreenings, formatHebrewDate, formatTime } from "../data.ts";
+import { data, filmBySlug, venueById, nextScreenings, formatHebrewDate, formatEnDate, formatTime } from "../data.ts";
 
 const upcoming = nextScreenings(12);
 const featured = data.films
@@ -25,14 +25,14 @@ const sectionCount = new Set(data.films.map((f) => f.section).filter(Boolean)).s
     <h2 data-he="הקרנות קרובות" data-en="Upcoming screenings">הקרנות קרובות</h2>
     <span class="section-heading__count">{upcoming.length}</span>
   </div>
-  {upcoming.length === 0 && <p style="color:var(--fg-dim)">אין הקרנות עתידיות במאגר. אולי הפסטיבל הסתיים, או שעדיין לא פורסם לוח הזמנים.</p>}
+  {upcoming.length === 0 && <p style="color:var(--fg-dim)" data-he="אין הקרנות עתידיות במאגר. אולי הפסטיבל הסתיים, או שעדיין לא פורסם לוח הזמנים." data-en="No upcoming screenings on record. The festival may have ended, or the schedule isn't published yet.">אין הקרנות עתידיות במאגר. אולי הפסטיבל הסתיים, או שעדיין לא פורסם לוח הזמנים.</p>}
   <div class="screening-list">
     {upcoming.map((s) => {
       const film = s.filmSlug ? filmBySlug.get(s.filmSlug) : undefined;
       const venue = s.venueId ? venueById.get(s.venueId) : undefined;
       return (
         <div class="screening-row">
-          <span class="screening-row__when">{formatHebrewDate(s.start)}</span>
+          <span class="screening-row__when" data-he={formatHebrewDate(s.start)} data-en={formatEnDate(s.start)}>{formatHebrewDate(s.start)}</span>
           <span class="screening-row__time">{formatTime(s.start)}</span>
           <span class="screening-row__venue">{venue?.nameHe ?? "—"}</span>
           {film
