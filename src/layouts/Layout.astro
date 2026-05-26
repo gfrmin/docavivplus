@@ -33,10 +33,10 @@ function navClass(href: string) {
       <div class="site-header__inner">
         <a href="/" class="site-header__logo">docaviv<span>+</span></a>
         <nav class="site-header__nav">
-          <a href="/" class={navClass("/")}>בית</a>
-          <a href="/films" class={navClass("/films")}>סרטים</a>
-          <a href="/schedule" class={navClass("/schedule")}>לוח זמנים</a>
-          <a href="/venues" class={navClass("/venues")}>מקומות</a>
+          <a href="/" class={navClass("/")} data-he="בית" data-en="Home">בית</a>
+          <a href="/films" class={navClass("/films")} data-he="סרטים" data-en="Films">סרטים</a>
+          <a href="/schedule" class={navClass("/schedule")} data-he="לוח זמנים" data-en="Schedule">לוח זמנים</a>
+          <a href="/venues" class={navClass("/venues")} data-he="מקומות" data-en="Venues">מקומות</a>
         </nav>
         <button class="site-header__lang" id="lang-toggle" type="button" aria-label="Switch language">EN</button>
       </div>
