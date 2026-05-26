@@ -58,6 +58,51 @@ export function sectionEn(raw: string): string {
   return SECTION_EN_MAP[raw] ?? raw;
 }
 
+// Venue display names. The source `nameHe` is actually English/transliterated and
+// often carries an internal hall-code prefix ("CIN3 - …"). Provide proper bilingual
+// names for the known venues; fall back to the source string with the code stripped.
+const VENUE_HE: Record<string, string> = {
+  "Beit Ziyonei America": "בית ציוני אמריקה",
+  "CIN1 - Tel Aviv Cinematheque - Hall 1": "סינמטק תל אביב · אולם 1",
+  "CIN2 - Tel Aviv Cinematheque - Hall 2": "סינמטק תל אביב · אולם 2",
+  "CIN3 - Tel Aviv Cinematheque - Hall 3": "סינמטק תל אביב · אולם 3",
+  "CIN4 - Tel Aviv Cinematheque - Hall 4": "סינמטק תל אביב · אולם 4",
+  "CIN5 - Tel Aviv Cinematheque - Hall 5": "סינמטק תל אביב · אולם 5",
+  "Tel Aviv Cinematheque - Hall 6": "סינמטק תל אביב · אולם 6",
+  "Tel Aviv Cinematheque Plaza": "רחבת הסינמטק",
+  "Tel Aviv Museum - Assia Auditorium": "מוזיאון תל אביב · אולם אסיה",
+  "Suzanne Dellal Centre for Dance and Theatre": "מרכז סוזן דלל",
+  "Gan Hapisga": "גן הפסגה",
+  "Herzel 107": "הרצל 107",
+  "Migdalor": "מגדלור",
+  "Mitzpor": "מצפור",
+  "Teder": "טדר",
+  "Tamra Davis": "תמרה דייוויס",
+};
+const VENUE_EN: Record<string, string> = {
+  "CIN1 - Tel Aviv Cinematheque - Hall 1": "Tel Aviv Cinematheque · Hall 1",
+  "CIN2 - Tel Aviv Cinematheque - Hall 2": "Tel Aviv Cinematheque · Hall 2",
+  "CIN3 - Tel Aviv Cinematheque - Hall 3": "Tel Aviv Cinematheque · Hall 3",
+  "CIN4 - Tel Aviv Cinematheque - Hall 4": "Tel Aviv Cinematheque · Hall 4",
+  "CIN5 - Tel Aviv Cinematheque - Hall 5": "Tel Aviv Cinematheque · Hall 5",
+  "Tel Aviv Cinematheque - Hall 6": "Tel Aviv Cinematheque · Hall 6",
+  "Tel Aviv Museum - Assia Auditorium": "Tel Aviv Museum · Assia Auditorium",
+  "Suzanne Dellal Centre for Dance and Theatre": "Suzanne Dellal Centre",
+  "Beit Ziyonei America": "Beit Zionei America",
+  "דרמה": "Drama",
+};
+function cleanVenue(raw: string): string {
+  return raw.replace(/^CIN\d+\s*-\s*/, "").trim();
+}
+export function venueNameHe(raw: string): string {
+  if (!raw) return "";
+  return VENUE_HE[raw] ?? cleanVenue(raw);
+}
+export function venueNameEn(raw: string): string {
+  if (!raw) return "";
+  return VENUE_EN[raw] ?? cleanVenue(raw);
+}
+
 // Hebrew day-of-week names
 const HE_DAYS = ["יום א׳", "יום ב׳", "יום ג׳", "יום ד׳", "יום ה׳", "יום ו׳", "שבת"];
 const EN_DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -74,6 +119,21 @@ export function formatTime(iso: string): string {
   return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 }
 export function dayKey(iso: string): string { return iso.slice(0, 10); }
+
+// "now" as a naive Asia/Jerusalem wall-clock string (YYYY-MM-DDTHH:mm:ss), matching
+// the offsetless `start` timestamps so string comparison stays apples-to-apples.
+// `new Date().toISOString()` would be UTC and skew the "upcoming" cutoff by the
+// Israel offset (2–3h), leaving screenings flagged "upcoming" after they've started.
+export function israelNow(): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Jerusalem",
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(new Date());
+  const v = (t: string) => parts.find((p) => p.type === t)!.value;
+  return `${v("year")}-${v("month")}-${v("day")}T${v("hour")}:${v("minute")}:${v("second")}`;
+}
 
 export function screeningsByDay(): Map<string, Screening[]> {
   const m = new Map<string, Screening[]>();
@@ -119,7 +179,7 @@ export function sectionHue(s: string): number {
   return (h >>> 0) % 360;
 }
 
-export function nextScreeningForFilm(film: Film, nowIso: string = new Date().toISOString()): Screening | undefined {
+export function nextScreeningForFilm(film: Film, nowIso: string = israelNow()): Screening | undefined {
   const list = film.screeningIds
     .map((id) => screeningById.get(id))
     .filter((s): s is Screening => Boolean(s))
@@ -128,7 +188,7 @@ export function nextScreeningForFilm(film: Film, nowIso: string = new Date().toI
 }
 
 export function nextScreenings(limit = 8): Screening[] {
-  const now = new Date().toISOString();
+  const now = israelNow();
   return data.screenings
     .filter((s) => s.start >= now)
     .sort((a, b) => a.start.localeCompare(b.start))
@@ -136,6 +196,6 @@ export function nextScreenings(limit = 8): Screening[] {
 }
 
 export function todayScreenings(): Screening[] {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = israelNow().slice(0, 10);
   return data.screenings.filter((s) => s.start.startsWith(today)).sort((a, b) => a.start.localeCompare(b.start));
 }

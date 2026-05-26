@@ -1,6 +1,7 @@
 ---
 import Layout from "../../layouts/Layout.astro";
-import { data, filmBySlug, venueById, screeningById, countryHe, countryEn, formatHebrewDate, formatEnDate, formatTime, hasRealPoster, sectionHue } from "../../data.ts";
+import ScreeningRow from "../../components/ScreeningRow.astro";
+import { data, filmBySlug, screeningById, countryHe, countryEn, hasRealPoster, sectionHue } from "../../data.ts";
 
 export function getStaticPaths() {
   // Astro 4 type-narrowing: import data fresh from JSON
@@ -19,7 +20,7 @@ const screenings = film.screeningIds
 const cHe = countryHe(film.countryHe);
 const cEn = countryEn(film.countryHe);
 ---
-<Layout title={film.titleHe || film.titleEn || "סרט"} description={film.synopsisHe?.slice(0, 160)}>
+<Layout title={film.titleHe || film.titleEn || "סרט"} description={film.synopsisHe?.slice(0, 160)} image={hasRealPoster(film) ? film.posterUrl : undefined}>
   <article class="film-detail">
     <div>
       {hasRealPoster(film) ? (
@@ -66,20 +67,7 @@ const cEn = countryEn(film.countryHe);
       </div>
       {screenings.length === 0 && <p style="color:var(--fg-dim)" data-he="אין הקרנות במאגר" data-en="No screenings on record">אין הקרנות במאגר</p>}
       <div class="screening-list">
-        {screenings.map((s) => {
-          const venue = s.venueId ? venueById.get(s.venueId) : undefined;
-          return (
-            <div class="screening-row">
-              <span class="screening-row__when" data-he={formatHebrewDate(s.start)} data-en={formatEnDate(s.start)}>{formatHebrewDate(s.start)}</span>
-              <span class="screening-row__time">{formatTime(s.start)}</span>
-              <span class="screening-row__venue">{venue?.nameHe ?? "—"}</span>
-              {s.isPremiere && <span class="screening-row__premiere" data-he="בנוכחות היוצרים" data-en="With filmmakers">בנוכחות היוצרים</span>}
-              {s.ticketUrl
-                ? <a class="screening-row__btn" href={s.ticketUrl} target="_blank" rel="noopener" data-he="לכרטיסים" data-en="Tickets">לכרטיסים</a>
-                : <span style="color:var(--fg-faint);font-size:0.85rem" data-he="אין קישור" data-en="No link">אין קישור</span>}
-            </div>
-          );
-        })}
+        {screenings.map((s) => <ScreeningRow screening={s} showFilm={false} ticketFallback={true} />)}
       </div>
 
       <p style="margin-top:2rem;color:var(--fg-faint);font-size:0.85rem">

@@ -1,6 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import { data, filmBySlug, venueById, screeningsByDay, formatTime } from "../data.ts";
+import ScreeningRow from "../components/ScreeningRow.astro";
+import { data, screeningsByDay } from "../data.ts";
 
 const days = [...screeningsByDay().entries()].sort();
 const HE_DAY_NAMES = ["יום ראשון", "יום שני", "יום שלישי", "יום רביעי", "יום חמישי", "יום שישי", "שבת"];
@@ -14,7 +15,7 @@ const dayLabelEn = (iso: string) => dayLabel(iso, EN_DAY_NAMES);
 ---
 <Layout title="לוח זמנים">
   <div class="section-heading">
-    <h2 data-he="לוח זמנים" data-en="Schedule">לוח זמנים</h2>
+    <h1 data-he="לוח זמנים" data-en="Schedule">לוח זמנים</h1>
     <span class="section-heading__count">{data.screenings.length} <span data-he="הקרנות" data-en="screenings">הקרנות</span></span>
   </div>
 
@@ -31,21 +32,7 @@ const dayLabelEn = (iso: string) => dayLabel(iso, EN_DAY_NAMES);
       <section id={`day-${day}`} class="schedule__day">
         <h2><span data-he={dayLabelHe(day)} data-en={dayLabelEn(day)}>{dayLabelHe(day)}</span> <span style="color:var(--fg-faint);font-size:0.7em">{screenings.length}</span></h2>
         <div class="screening-list">
-          {screenings.map((s) => {
-            const film = s.filmSlug ? filmBySlug.get(s.filmSlug) : undefined;
-            const venue = s.venueId ? venueById.get(s.venueId) : undefined;
-            return (
-              <div class="screening-row">
-                <span class="screening-row__time">{formatTime(s.start)}</span>
-                <span class="screening-row__venue" style="min-width:11rem">{venue?.nameHe ?? "—"}</span>
-                {film
-                  ? <a href={`/films/${film.slug}/`} style="flex:2;color:var(--fg)" data-he={film.titleHe} data-en={film.titleEn || film.titleHe}>{film.titleHe}{film.titleEn && <span style="color:var(--fg-faint)"> · {film.titleEn}</span>}</a>
-                  : <span style="flex:2;color:var(--fg-dim)">{s.infoText}</span>}
-                {s.isPremiere && <span class="screening-row__premiere" data-he="בנוכחות היוצרים" data-en="With filmmakers">בנוכחות היוצרים</span>}
-                {s.ticketUrl && <a class="screening-row__btn" href={s.ticketUrl} target="_blank" rel="noopener" data-he="לכרטיסים" data-en="Tickets">לכרטיסים</a>}
-              </div>
-            );
-          })}
+          {screenings.map((s) => <ScreeningRow screening={s} showDate={false} />)}
         </div>
       </section>
     ))}

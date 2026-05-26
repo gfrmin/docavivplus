@@ -20,26 +20,29 @@ const filmIndex = data.films.map((f) => ({
   countryEn: countryEn(f.countryHe),
   runtimeMin: f.runtimeMin,
   synopsisHe: f.synopsisHe,
-  synopsisEn: f.synopsisEn,
   hasScreenings: f.screeningIds.length > 0,
 }));
 ---
 <Layout title="כל הסרטים">
   <div class="section-heading">
-    <h2 data-he="כל הסרטים" data-en="All films">כל הסרטים</h2>
+    <h1 data-he="כל הסרטים" data-en="All films">כל הסרטים</h1>
     <span class="section-heading__count">{data.films.length}</span>
   </div>
 
   <div class="filters">
+    <label class="sr-only" for="f-search" data-he="חיפוש סרטים" data-en="Search films">חיפוש סרטים</label>
     <input id="f-search" type="search" placeholder="חיפוש לפי כותרת, במאי, או תקציר…" data-placeholder-he="חיפוש לפי כותרת, במאי, או תקציר…" data-placeholder-en="Search title, director, or synopsis…" />
+    <label class="sr-only" for="f-section" data-he="סינון לפי מסגרת" data-en="Filter by section">סינון לפי מסגרת</label>
     <select id="f-section" data-sort-options>
       <option value="" data-he="כל המסגרות" data-en="All sections">כל המסגרות</option>
       {sections.map((s) => <option value={s} data-he={s} data-en={sectionEn(s)}>{s}</option>)}
     </select>
+    <label class="sr-only" for="f-country" data-he="סינון לפי מדינה" data-en="Filter by country">סינון לפי מדינה</label>
     <select id="f-country" data-sort-options>
       <option value="" data-he="כל המדינות" data-en="All countries">כל המדינות</option>
       {countries.map((c) => <option value={c} data-he={countryHe(c)} data-en={countryEn(c)}>{countryHe(c)}</option>)}
     </select>
+    <label class="sr-only" for="f-runtime" data-he="סינון לפי אורך" data-en="Filter by length">סינון לפי אורך</label>
     <select id="f-runtime">
       <option value="" data-he="כל אורך" data-en="Any length">כל אורך</option>
       <option value="short" data-he="קצר (עד 60ד׳)" data-en="Short (≤60min)">קצר (עד 60ד׳)</option>
@@ -78,13 +81,12 @@ const filmIndex = data.films.map((f) => ({
       countryEn: string;
       runtimeMin: number | null;
       synopsisHe: string;
-      synopsisEn: string;
       hasScreenings: boolean;
     };
 
     const indexData = JSON.parse((document.getElementById("film-index") as HTMLElement).textContent || "[]") as FilmEntry[];
     const fuse = new Fuse(indexData, {
-      keys: ["titleHe", "titleEn", "director", "synopsisHe", "synopsisEn", "section"],
+      keys: ["titleHe", "titleEn", "director", "synopsisHe", "section"],
       threshold: 0.35,
       ignoreLocation: true,
       minMatchCharLength: 2,

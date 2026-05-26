@@ -5,10 +5,16 @@ export interface Props {
   title: string;
   description?: string;
   lang?: "he" | "en";
+  image?: string;
 }
 
-const { title, description = "מדריך הסרטים של פסטיבל דוקאביב — חיפוש, סינון, ולוח זמנים נקי", lang = "he" } = Astro.props;
+const { title, description = "מדריך הסרטים של פסטיבל דוקאביב — חיפוש, סינון, ולוח זמנים נקי", lang = "he", image } = Astro.props;
 const dir = lang === "he" ? "rtl" : "ltr";
+const fullTitle = `${title} — docaviv+`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL(
+  image ?? "https://www.docaviv.co.il/wp-content/uploads/2026/05/DOCAVIV-Main-Slide-1-scaled.png",
+).href;
 const pathname = Astro.url.pathname;
 function navClass(href: string) {
   if (href === "/" && pathname === "/") return "active";
@@ -21,8 +27,27 @@ function navClass(href: string) {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>{title} — docaviv+</title>
+    <script is:inline>
+      // Apply saved language/direction before first paint to avoid an RTL↔LTR flash.
+      try {
+        var l = localStorage.getItem('docavivplus-lang') || 'he';
+        document.documentElement.lang = l;
+        document.documentElement.dir = l === 'he' ? 'rtl' : 'ltr';
+      } catch (e) {}
+    </script>
+    <title>{fullTitle}</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="docaviv+" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
     <link rel="preconnect" href="https://www.docaviv.co.il" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

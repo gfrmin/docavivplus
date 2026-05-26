@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  # Daily rebuild so the build-time "upcoming screenings" list stays current
+  # during the festival even without a code change. 03:00 UTC ≈ 06:00 Israel.
+  schedule:
+    - cron: "0 3 * * *"
 
 # Cancel an in-progress deploy if a newer commit lands
 concurrency:

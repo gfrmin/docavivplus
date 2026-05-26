@@ -14,7 +14,7 @@ const nextEn = next ? `${formatEnDate(next.start)} · ${formatTime(next.start)}`
 ---
 <a class="film-card" href={`/films/${film.slug}/`}>
   {realPoster ? (
-    <div class="film-card__poster" style={`background-image:url(${film.posterUrl})`}></div>
+    <img class="film-card__poster" src={film.posterUrl} alt="" loading="lazy" decoding="async" />
   ) : (
     <div class="film-card__poster film-card__poster--placeholder" style={`--hue:${hue}`}>
       <span class="film-card__poster-title" data-he={film.titleHe} data-en={film.titleEn || film.titleHe}>{film.titleHe}</span>

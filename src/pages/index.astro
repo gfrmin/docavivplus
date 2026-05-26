@@ -1,7 +1,8 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import FilmCard from "../components/FilmCard.astro";
-import { data, filmBySlug, venueById, nextScreenings, formatHebrewDate, formatEnDate, formatTime } from "../data.ts";
+import ScreeningRow from "../components/ScreeningRow.astro";
+import { data, nextScreenings } from "../data.ts";
 
 const upcoming = nextScreenings(12);
 const featured = data.films
@@ -27,22 +28,7 @@ const sectionCount = new Set(data.films.map((f) => f.section).filter(Boolean)).s
   </div>
   {upcoming.length === 0 && <p style="color:var(--fg-dim)" data-he="אין הקרנות עתידיות במאגר. אולי הפסטיבל הסתיים, או שעדיין לא פורסם לוח הזמנים." data-en="No upcoming screenings on record. The festival may have ended, or the schedule isn't published yet.">אין הקרנות עתידיות במאגר. אולי הפסטיבל הסתיים, או שעדיין לא פורסם לוח הזמנים.</p>}
   <div class="screening-list">
-    {upcoming.map((s) => {
-      const film = s.filmSlug ? filmBySlug.get(s.filmSlug) : undefined;
-      const venue = s.venueId ? venueById.get(s.venueId) : undefined;
-      return (
-        <div class="screening-row">
-          <span class="screening-row__when" data-he={formatHebrewDate(s.start)} data-en={formatEnDate(s.start)}>{formatHebrewDate(s.start)}</span>
-          <span class="screening-row__time">{formatTime(s.start)}</span>
-          <span class="screening-row__venue">{venue?.nameHe ?? "—"}</span>
-          {film
-            ? <a href={`/films/${film.slug}/`} style="flex:2;color:var(--fg)">{film.titleHe} {film.titleEn && <span style="color:var(--fg-faint)">· {film.titleEn}</span>}</a>
-            : <span style="flex:2;color:var(--fg-dim)">{s.infoText}</span>}
-          {s.isPremiere && <span class="screening-row__premiere" data-he="בנוכחות היוצרים" data-en="With filmmakers">בנוכחות היוצרים</span>}
-          {s.ticketUrl && <a class="screening-row__btn" href={s.ticketUrl} target="_blank" rel="noopener" data-he="לכרטיסים" data-en="Tickets">לכרטיסים</a>}
-        </div>
-      );
-    })}
+    {upcoming.map((s) => <ScreeningRow screening={s} />)}
   </div>
 
   <div class="section-heading">

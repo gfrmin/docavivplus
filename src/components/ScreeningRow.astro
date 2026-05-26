@@ -1,0 +1,31 @@
+---
+import type { Screening } from "../data.ts";
+import { filmBySlug, venueById, venueNameHe, venueNameEn, formatHebrewDate, formatEnDate, formatTime } from "../data.ts";
+
+export interface Props {
+  screening: Screening;
+  showDate?: boolean;
+  showVenue?: boolean;
+  showFilm?: boolean;
+  ticketFallback?: boolean;
+}
+const { screening: s, showDate = true, showVenue = true, showFilm = true, ticketFallback = false } = Astro.props;
+const film = showFilm && s.filmSlug ? filmBySlug.get(s.filmSlug) : undefined;
+const venue = showVenue && s.venueId ? venueById.get(s.venueId) : undefined;
+---
+<div class="screening-row">
+  {showDate && (
+    <span class="screening-row__when" data-he={formatHebrewDate(s.start)} data-en={formatEnDate(s.start)}>{formatHebrewDate(s.start)}</span>
+  )}
+  <span class="screening-row__time">{formatTime(s.start)}</span>
+  {showVenue && (
+    <span class="screening-row__venue" data-he={venue ? venueNameHe(venue.nameHe) : "—"} data-en={venue ? venueNameEn(venue.nameHe) : "—"}>{venue ? venueNameHe(venue.nameHe) : "—"}</span>
+  )}
+  {showFilm && (film
+    ? <a class="screening-row__film" href={`/films/${film.slug}/`} data-he={film.titleHe} data-en={film.titleEn || film.titleHe}>{film.titleHe}{film.titleEn && <span style="color:var(--fg-faint)"> · {film.titleEn}</span>}</a>
+    : <span class="screening-row__film screening-row__film--info">{s.infoText}</span>)}
+  {s.isPremiere && <span class="screening-row__premiere" data-he="בנוכחות היוצרים" data-en="With filmmakers">בנוכחות היוצרים</span>}
+  {s.ticketUrl
+    ? <a class="screening-row__btn" href={s.ticketUrl} target="_blank" rel="noopener" data-he="לכרטיסים" data-en="Tickets">לכרטיסים</a>
+    : ticketFallback && <span class="screening-row__nolink" data-he="אין קישור" data-en="No link">אין קישור</span>}
+</div>
