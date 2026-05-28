@@ -224,6 +224,7 @@ h3 { font-size: 1.2rem; }
 .film-detail__meta { color: var(--fg-dim); display: flex; gap: 1.25rem; flex-wrap: wrap; margin-bottom: 1.5rem; font-size: 0.95rem; }
 .film-detail__meta span strong { color: var(--fg); font-weight: 500; }
 .film-detail__synopsis { line-height: 1.65; font-size: 1.02rem; margin-bottom: 2rem; max-width: 70ch; }
+html[lang="en"] .film-detail__synopsis[data-en-missing="true"] { font-style: italic; color: var(--fg-dim); }
 .film-detail__trailer { aspect-ratio: 16/9; width: 100%; max-width: 720px; margin-bottom: 2rem; border: 0; border-radius: var(--radius); }
 
 /* Screenings list */

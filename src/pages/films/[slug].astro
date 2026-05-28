@@ -45,7 +45,12 @@ const cEn = countryEn(film.countryHe);
       </div>
 
       {film.synopsisHe && (
-        <p class="film-detail__synopsis" data-he={film.synopsisHe} data-en={film.synopsisEn || film.synopsisHe}>
+        <p
+          class="film-detail__synopsis"
+          data-he={film.synopsisHe}
+          data-en={film.synopsisEn || "Synopsis available in Hebrew only."}
+          data-en-missing={film.synopsisEn ? undefined : "true"}
+        >
           {film.synopsisHe}
         </p>
       )}
