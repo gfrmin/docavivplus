@@ -1,0 +1,23 @@
+---
+// Astro emits this to dist/404.html, which is what wrangler.jsonc's
+// not_found_handling: "404-page" serves. Without this file that setting has
+// nothing to serve and unmatched paths fall back to a bare Workers 404.
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="404">
+  <div class="section-heading">
+    <h1 data-he="הדף לא נמצא" data-en="Page not found">הדף לא נמצא</h1>
+  </div>
+
+  <p style="margin:0 0 1.5rem">
+    <span data-he="הקישור כנראה שגוי, או שהסרט כבר לא בתוכנייה."
+          data-en="The link is probably wrong, or the film is no longer in the programme."
+    >הקישור כנראה שגוי, או שהסרט כבר לא בתוכנייה.</span>
+  </p>
+
+  <p style="display:flex;gap:1rem;flex-wrap:wrap">
+    <a href="/" data-he="לכל הסרטים" data-en="All films">לכל הסרטים</a>
+    <a href="/schedule/" data-he="ללוח הזמנים" data-en="Schedule">ללוח הזמנים</a>
+  </p>
+</Layout>

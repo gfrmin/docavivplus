@@ -12,18 +12,15 @@
   "assets": {
     "directory": "./dist",
 
-    // Behaviour-preserving on migration, NOT a considered choice.
+    // A multi-page static site with a real sitemap: an unmatched path is a
+    // genuine 404 and must say so. Under Pages' default fallback (and under
+    // "single-page-application", which the cutover used to preserve it) every
+    // mistyped film URL returned 200 and the index page, so a crawler could
+    // index the same content under unlimited URLs.
     //
-    // On Pages, a project with no 404.html gets the default SPA fallback: any
-    // unmatched path serves index.html with a 200. This reproduces that exactly,
-    // so the cutover changes nothing observable.
-    //
-    // It is wrong for this site — it is a multi-page static site with a real
-    // sitemap, so every mistyped film URL currently returns 200 and the index.
-    // Fixed in the next commit by adding src/pages/404.astro and switching to
-    // "404-page"; kept separate so a cutover regression is attributable to the
-    // cutover and not to two changes at once.
-    "not_found_handling": "single-page-application",
+    // Serves dist/404.html, which Astro builds from src/pages/404.astro. This
+    // setting is inert without that file.
+    "not_found_handling": "404-page",
   },
 
   "observability": {
