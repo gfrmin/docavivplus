@@ -10,8 +10,7 @@
     "ingest:join": "tsx ingest/join.ts",
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview",
-    "deploy": "./deploy.sh"
+    "preview": "astro preview"
   },
   "dependencies": {
     "@astrojs/sitemap": "3.2.1",

@@ -1,0 +1,32 @@
+{
+  // Cloudflare Workers config. Deploy by pushing to master —
+  // .github/workflows/deploy.yml calls the shared recipe in gfrmin/site-kit.
+  //
+  // Migrated from Cloudflare Pages 2026-09-05. Pages stays supported and gets
+  // bug fixes, but all new platform investment goes to Workers. The old Pages
+  // project `docavivplus` is left in place as the rollback.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "docavivplus",
+  "compatibility_date": "2026-09-05",
+
+  "assets": {
+    "directory": "./dist",
+
+    // Behaviour-preserving on migration, NOT a considered choice.
+    //
+    // On Pages, a project with no 404.html gets the default SPA fallback: any
+    // unmatched path serves index.html with a 200. This reproduces that exactly,
+    // so the cutover changes nothing observable.
+    //
+    // It is wrong for this site — it is a multi-page static site with a real
+    // sitemap, so every mistyped film URL currently returns 200 and the index.
+    // Fixed in the next commit by adding src/pages/404.astro and switching to
+    // "404-page"; kept separate so a cutover regression is attributable to the
+    // cutover and not to two changes at once.
+    "not_found_handling": "single-page-application",
+  },
+
+  "observability": {
+    "enabled": true,
+  },
+}
