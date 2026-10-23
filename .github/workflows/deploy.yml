@@ -18,6 +18,7 @@ jobs:
     uses: gfrmin/site-kit/.github/workflows/worker-deploy.yml@master
     with:
       build: npm run build
+      expect: "docaviv+"
       # Astro 4 needs Node >= 21; 24 is the fleet pin, set in site-kit.
       node: "24"
     secrets: inherit
