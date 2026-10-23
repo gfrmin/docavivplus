@@ -1,0 +1,17 @@
+# docaviv+
+
+> docaviv+ is an unofficial, faster discovery frontend for Docaviv, the Tel Aviv International Documentary Film Festival. It mirrors the festival's public programme into a static site with search, filtering and a coherent screening schedule.
+
+The site is in Hebrew first, with an English toggle on each page. Film data comes from the festival's official site, https://www.docaviv.co.il, which remains the authority on the programme and sells the tickets; docaviv+ links each screening to its ticket page there.
+
+## Hubs
+
+- [Home](https://docavivplus.gfrm.in/): the festival overview and upcoming screenings
+- [All films](https://docavivplus.gfrm.in/films/): every film in the programme, with search by title, director or synopsis and filters by section and country
+- [Schedule](https://docavivplus.gfrm.in/schedule/): all screenings by day, time and venue
+- [Venues](https://docavivplus.gfrm.in/venues/): the festival's screening venues, each with its own page of screenings
+
+## Optional
+
+- [Sitemap](https://docavivplus.gfrm.in/sitemap-index.xml): every page on the site, including one page per film and per venue
+- [Docaviv official site](https://www.docaviv.co.il): the festival's own site and ticketing
